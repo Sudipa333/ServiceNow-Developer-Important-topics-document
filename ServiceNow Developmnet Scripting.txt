@@ -1,0 +1,534 @@
+1st Day -----
+
+1. What is an API---
+ It is a mechanism by which two different application can talk to each otherusing a set of definitions. API is set of classes and methods which is provided by one of the company[server] for service to another company who ask for service[client]. Company should use API key to access the application. Client will send request using API key and server will send response to allow access.
+   
+2. ServiceNow API-----
+API that ha been created by the ServiceNow developers to make our work easy.
+There are mainly 5 types of API available in ServiceNow.
+ i.Client ii.Client Mobile iii.Server Scoped iv.Server Global v.REST
+
+3. Client Side API----
+ * GlideForm API-[Managing form and form fields]
+   - GlideForm [class]
+   - g_form {Global Object}
+   - g_form.addInfoMessage('sudipa samanta'); {Method}
+
+  * GlideUser API (logged in user details and user roles)
+   -GlideUser {Class}
+   - g_user {Global Object}
+   - g_user.userName(); {propertey/method}
+
+** we can use client API in client script, UI policy , UI actions(client).
+
+4. Server Side API----
+
+  * GlideRecord API (Used for database operation)
+
+  - GlideRecord {Class}
+  - Initialize the object {var gr = new GlideRecord('incident');}
+  - gr.addQuery('priority',1); {method}
+
+ * GlideSystem API (Information about the system and current log in user)
+
+  - GlideSystem {class}
+  - gs {Global Object}
+  - gs.yesterday(); {Method}
+  - gs.getUserName(); //see about current logged in user
+
+ ** we can use server side API in Business Rules, UI Action(server), Script Include,Fix Script, Background script, Schedule jobs, workflow script.
+
+5. What is GlideRecord-----
+
+  i. It is a Server Side API.
+  ii. It is used for solving ServiceNow database operations.
+  iii. It contains records from a single table.
+  iv. It is used in Server Side scripting like Business Rules, Script Include, UI Action(server), Email Scripts etc.
+
+Why we need GlideRecord----
+  
+   i. Scenario--
+   * Need to see all the incidents where priority is 1.
+   ** Need to see all the active incidents.
+   *** Need to see all the incident that is created after 15th October 2023, 10a.m.
+   **** Need to create or update incident using scripting.
+
+List of GlideRecord Methods---
+  
+  *addQuery('priority',1)//takes field,operator and values and based on them give the result, you can also provide only field and value or only copied query and it will give resultant records
+  *.orderBy()//ordered the resultant values in ascending order based on provided field     
+  *.orderByDesc()//ordered the resultant values in descending order based on provided field   
+  *.insert()//use to insert the record                    
+  *.next()//continuously iterate the loop
+  *.addActiveQuery()//to find out all the active records       
+  *.query()//use to apply the query         
+  *.update()//use to update the record        
+  *.hasNext()//similar to next() method but this returns boolean, so if you try to print something using hasNext() in while loop it can't able to print anything
+  * addEncodedQuery()//use to apply difficult and huge conditions , same as addQuery()   
+  * setLimit()//set the limit to display resultant records        
+  * getDisplayValue()//use to get the value which is displayed to us on UI
+  *  initialize()//use to initialize the object so that you can add value to the object's fields and do any database operations like insert,query,update etc.
+  * addNotNullQuery()//use to apply the filter condition where specific field value is not null       
+  * setValue()//use to set the some value to the specific field     
+  * getRowCount()//to get how many rows are there in resultant after applying some condition
+  * canCreate()               
+  * get()//use to get the value of perticular field by providing exact condition of field and values, take upto 2 parameters, field and value, but you can't provide operator as condition, operator option only available for .addQuery()            
+  * getValue()//use to get the value of the specific field
+  * updateMultiple()//use to update many records without using while loop
+
+Using GlideRecord API----
+
+  * Create a GlideRecord object based on your required table
+      var incidentRecord = new GlideRecord('incident');
+  * Build the query condition based on your requirements
+       incidentRecord.addQuery('category','software');
+  * Execute the query
+       incidentRecord.query();
+  * Apply scripting logic to the records that returned in the object
+       while(incidentRecord.next()){       //when you retrieve many records use 'while' loop, otherwise use 'if'
+            gs.info('Incident numbers are: ' + incidentRecord.number);
+        }
+
+
+
+6. GlideSystem API------
+
+  *gs.log()//use to store information on system logs, can take two parameters like ->gs.log('I am Sudipa Samanta','test'),where test is used as source of the log,source used to find out the message from huge number of messages of system logs. gs.log() is global object property.
+  *gs.info()//works like gs.log() but it is scoped object property.
+  *gs.error()//use to give error messages, works in scoped application
+  *gs.warning()//use to warning the messages
+  *gs.print()//just print the messages  
+  *gs.getUserId()//to get current loggedin user sys_id
+  *gs.getUserName()//to get the current loggedIn user name
+  *gs.getCurrentScopeName()//to get current scope of the system
+  *gs.getUser()//this property is coming from GlideUser family,returns some details about the user who is currently loggedIn
+  *gs.getUser().hasRole('admin')//to check the current loggedin user has this role or not, return boolean
+  *gs.getUser().isMemberOf('App Engine Admins')//to check the currently loggedin user is part of the specific group or not
+  *gs.getProperty('test.property');//use to get the value of the specific property
+
+7. GlideForm in Client Side Scripting----
+
+  *g_form.addDecoration('category','icon-lightbulb','lightbulb','color-yellow');//for decoration the form, first write filed name where to use, icon poperty of addDecoration, name of the icon, color of the icon.
+   *g_form.addInfoMessage('this is me');//showing some info at the top of the form,in blue colored box.
+   *g_form.addErrorMessage('this is error')//showing some error message in red box at the top of the form.
+   *g_form.addFormMessage('this is warning','warning');//showing some warning in yellow colored box at top of form
+   *g_form.getValue('caller_id')//get the value of the specific field, it returns sys_id as value where field type is reference
+   *g_form.getDisplayBox('caller_id').value;//help to get the value of the specific field what displays in the form box
+   *g_form.addOption('category','tech_issue','Tech Issue');//add option where field type is choice,first write field name, then backend name, then dispay name
+   *g_form.removeOption('category','software')//remove the option from the field where type is choice
+   *g_form.clearOption('category');//clear the whole field options which type is choice
+   *g_form.diableAttachments()//to not show the attachment sign on form
+   *g_form.enableAttachments()//to show the attachment sign on form
+   *g_form.setMandatory('cmdb_ci',true);//set the specific field as mandatory
+   *g_form.setDisplay('business_service',false)//help to display or not to display the specific field
+   *g_form.setReadOnly('service_offering',true);//to make any field read-only
+   *g_form.setLabelOf('description','Issue Details');
+   *g_form.hideRelatedList('task_sla');//to hide any sections of the form
+   *g_form.hideRelatedLists()//to hide all the sections part of the form
+   *g_form.getElement('state').style.background='green';//to make the whole field elements in any color
+   
+8.GlideUser property and methods---- (for some knowledge blue boxes in intellisence are methods and purple boxes are properties)
+   
+  *g_user.firstName//get the first name of current loggedIn user
+  *g_user.lastName//get the last name of current loggedIn user
+  *g_user.userID//get the sys_id of the current logged in user record
+  *g_user.userName//get the backend name of the current logged in user
+  *g_user.getFullName()//get display name of the current logged in user
+  *g_user.hasRole('demo1')//it returns true if the logged in user has the specific mentioned role or admin role,otherwise return false
+  *g_user.hasRoleExactly('demo1') //it returns true if the logged in user has the specific mentioned role
+  *g_user.hasRoleList('demo1,itil,security_admin')//returns true f the current logged in user has any role from the list of different roles
+  *g_user.hasRoles()//if current logged in user has any roles give permission to do some task 
+
+9.Accessing Server Data from Client----
+
+  *g_scratchpad
+  *getReference('field_name',callback function)
+  *GlideAjax
+
+ i.g_scratchpad----
+   a. it is an object that passes information from server to client
+   b. you need to create g_scratchpad properties to hold the information
+   c. you can call the g_scratchpad property from client side scripting(client script)
+   d. it only shows the information when the form is loaded
+   e. it should only be used when you should not expect the data to be changed dynamically, after refresh the page it will show the result.
+    f. use cases----1
+       based on selected caller on incident table , show the info message included the email id of that caller
+        task---write (var g_scratchpad.store_email=current.caller_id.email;)in the business rule at display and write (g_form.addInfoMessage('The email id of the current caller is '+g_scratchpad.store_email) in the client script of incident table) ,here store_email is variable of the object where you store the information.
+    g. use cases----2
+        when you create a problem task from a problem record, then it would automatically load short description, description, assigned to field      value from the problem record
+        task--- write(var gr = new GlideRecord('problem');
+                               g_scratchpad.parent=current.problem;
+                               g_scratchpad.shortDesc = gr.short_description;
+                               g_scratchpad.Desc = gr.description;
+                               g_scratchpad.assignedTo = gr.assigned_to;) to the business rule of the problem_task table ,at display then write 
+                  
+               ( if(g_scratchpad.parent){
+                      g_form.setValue('short_description',g_scratchpad.shortDesc);
+                      g_form.setValue('description',g_scratchpad.Desc);
+                      g_form.setValue('assigned_to',g_scratchpad.assigned_to);
+                    } ) to the client script of the problem_task table, set the condition in the client script that problem is not empty.
+ 
+ ii.getReference()----
+     a. getReference('field name')-- synchronous
+          *It is one of the method of GlideForm API
+          *It helps to get the entire record of a regerence field
+          *It works synchronously.
+          *It causes processing halts while waiting for server response, it delays to give the result
+          *How synchronous method works?
+                var userEmail = g_form.getReference('caller_id').email;
+               step1: it tooks for the reference record in the database, then the script and the processing halts until it finishes the step 1.
+               step2: After completing step 1 it requests the server for the email id of the caller.
+
+     b. getReference('field name',callBack function)---asynchronous
+          *same method but using two parameters
+          *it is an asynchronous process.
+          *callBack function executes when the server returns the reference value.
+          *it is highly recommend to use a callBack function
+          *How the Asynchronous method works?
+               g_form.getReference('caller_id',getEmail);
+                function.getEmail(userEmail){
+                 g_form.addInfoMessage(userEmail.email);
+                 }
+            As callback function is present the process and browser works normally(without halts)
+           Once the server returns the reference value the callBack function starts working
+         *Use cases---1
+         In the incident form add a field email and when the caller changes the email should also get change.
+           Task---   First add the field name 'Email ID' on the incident form using form layout,write script on client choose type as onChange(), field name choose caller, then write ---
+                        g_form.getReference('caller_id',getEmail);
+                           function getEmail(userEmail){
+                                    g_form.setValue('u_email_id',userEmail.email);
+                           }
+         *when you use this getReference() method it dynamically changes the field value based on condition, but using g_scratchpad you can't able to change the value dynamically.
+         *ServiceNow recommend to use GlideAjax instead of getReference in Client side as getReference takes more time than GlideAjax because it loads all the records from reference table of the field and then use callBack function.
+ 
+
+10. Use cases and solution of the Business Rule-------
+ 
+       Use Case----1. If the priority of a problem record changes to critical, then it will create two different types(General, Root Cause Analysis) of problem task.Also in short description field the type should be mentioned.
+         task----- create business rule on problem table, after update, make the condition field priority changes to 1-critical then write(
+                                          var type = ['General','Root Cause Analysis'];
+                                            for(i=0;i<2;i++){
+                                               var gr = new GlideRecord('problem_task');
+                                               gr.initialize();
+                                               gr.problem_task_type=type[i];
+                                               gr.short_description='Task type of'+type[i];
+                                               gr.problem= current.sys_id;//for both problem task the problem no. will be same that os problem table's number
+                                               gr.insert();
+                                            })
+        Use Case----2. If work notes for an incident record changes, it shoud update the same work notes in the associate problem record also.
+           Task --- first of all set any problem to any incident as you wish, go to incident form, on 'related records' section add any problem using look-up field. then in business rule select incident as table, after update, set condition as 'work notes changes', write code(
+                                    var gr = new GlideRecord('problem');
+                                    gr.addQuery('number',current.problem_id.number);
+	                    gr.query();
+	                     if(gr.next()){
+		     gr.work_notes=current.work_notes.getJournalEntry(1);
+	                    }
+	                    gr.update(); )
+ 
+          Use Case----3. Create a field in Problem table named as Associate Incident Count. Once an Incident will attach to a problem record, the count will increase.   
+             Task---- create business rule on incident table, set filter condition as 'problem changes' and 'problem is not empty',then write code(
+                                           var gr = new GlideRecord('problem');
+                                            gr.addQuery('sys_id',current.problem_id);
+                                            gr.query();
+                                             if(gr.next()){
+                                             gr.u_associate_incident_count = gr.u_associate_incident_count+1;
+                                            }
+                                             gr.update();
+) 
+
+11. Script Include------
+      
+        i. It stores reuseable javascript code that runs on the server.
+        ii. In a single Script include record you can store multiple javascript functions, methods.
+        iii.Script include does not have a trigger condition like other type of scripts (Business Rule, Client Script, UI Policy etc.)
+        iv.It is getting called from other scripting location.
+        v. Only server side API can be used inside of script include. 
+        vi. How script include works?
+              a.It is getting called.
+              b. It receives some data from calling script.
+              c. It executes the code.
+              d. It returns the value to the calling script.
+       vii. Script Include can be availiable either for Server Side or Client Side.
+       viii. Types of Script Include---
+               a. On Demand/Classless Function (Only works on Server Side)
+               b. Define a new class/Class Base(works on server side and client side both)
+               c. Extend an existing class(get benefits from existing classes,like you can see after checking the 'Client callable' --->    Object.extendsObject(AbstractAjaxProcessor,..... in script include)
+        ix. API name is auto generated for Script Include like this format--> application scope.name of the script
+        x. if you check the Client callable option then it works for client script and if it is unchecked then works for server side.
+        xi. the class name of the script include should be same as the given name of the script.
+        xii. On Demand /Classless Script Include---
+               a. Contains one function.
+               b. Name of the function must the script include name.
+               c. Can be called from any server side scripting.
+               d. Can't be called from client side.
+               e. Use cases---1--- When you update incident work notes, then it should also update the same work notes for the associate problem record. (using classless/on demand script include)
+                       task----  first as this is classless script include remove all the classess, functions that is pre-written over script include script.
+                         create only one function on script include, function name will be same as the script name, -- write code like this--->
+                                function updateWorkNotes(problemID,workNotes){
+                                         var gr = new GlideRecord('problem');
+                                                gr.addQuery('sys_id',problemID);
+                                                gr.query();
+                                                if(gr.next()){
+                                                   gr.work_notes = workNotes;
+                                                    gr.update();
+                                                }   
+                                 }
+                          classless script include works only on server side so,write code on business rule for incident table,after update,filter condition work-notes changes ---
+                      var workNotes =  current.work_notes.getJournalEntry(-1);//you can also write 1 here, to get work-notes in separate activity box 
+                       updateWorkNotes(current.problem_id,workNotes);//method name should be same as script include function name
+          xiii. Define a New Class/ClassBase Script Include-----
+                    a. It is complex and contains multiple functions.
+                    b. Name of the class must be matched with the name of Script Include.
+                    c. Can be called from both server-side and client side.
+                    d. var Test = Class.create();//create new class named Test, create() is an empty method, which helps to create new object/instance
+                    e. Test.prototype = { //prototype helps to make availiable all the functions to be usable on all the instances of the class, if you don't use prototype then you will get the copy of the function, not the value/properties inside it. 
+                           initialize:function(){//initialize is the name of the function, this is default function
+                                      
+                                      },
+                             check:function(){
+                                     },
+                             type: 'Test'
+                            };
+                             var obj = new Test();//like this you can create new instance/object
+                              obj.check();//you can access the function like this
+
+                     f. use cases-----1---- When priority of the problem record changes to critical, then an associate incident will create for the same problem record. Incident should contain following info-- Caller name should be logged in user name, In the description it will contain--a. All the task number that are attached to the current problem record. b. Name of the groups where the assignee of the problem record is part of.
+                          task---first create some task on problem table, check the 'assigned to' field has any value or not, if not assign some user who is part of any group. create business rule on problem table , after update, condition is 'priority changes to 1-critical' write code---
+                               var mainObj = new getProblemDetails(); //'getProblemDetails' is the name of Script include
+                               var gr = new GlideRecord('incident');
+                               gr.problem_id = current.sys_id;//as problem field on incident table is a lookup field, it requires sys_id of the problem record
+                               gr.short_description = 'Hi , this is new incident of the record';
+                               gr.caller_id = gs.getUserID();
+                               gr.description = 'The problem tasks are '+mainObj.getProblemTask(current.sys_id)+' Groups of assignee '+                                mainObj.getUserGroup(current.assigned_to);
+                                gr.insert();
+
+              write the code in script include, create new function-----
+                   getProblemTask: function(problem_id){
+                           var  pTask=[];
+                            var gr = new GlideRecord('problem_task');
+                             gr.query();
+                             while(gr.next()){
+                                   pTask.push(gr.getDisplayValue('number'));
+                             }
+                        return pTask;
+                    },
+                     getUserGroup: function(assigned_to){
+                         var grMember = [];
+                         var gr = new GlideRecord('sys_user_grmember');//we can use same name variable under same class,here 'gr'
+                         gr.addQuery('user',assigned_to);
+                         gr.query();
+                          while(gr.next()){
+                             gMember.push(gr.getDisplayValue('group'));
+                            }
+                           return gMember;
+                      },
+  
+          xiv. Extend an existing class in Script Include----
+                  a. You can extend an existing class in your new script include.
+                  b. You can use extendsObject() method to extend one of the class that you created previously or any OOB(out of the box) class.
+                  c. You can access all the methods from the extended script include.
+                  d. You can use it in both Server and Client side.(mainly on client side)
+                  e. You can to extend AbstractAjaxProcessor class in script include.
+                   f. It is a OOB(out of box) script include
+                  g. getParameter() method is used to get the information from the client script and send back the information to the client. 
+                  h. after clicking the  'client callable' you will get auto-generated code--
+                       var test  = Class.create();
+                         test.prototype = Object.extendsObject(AbstractAjaxProcessor,{
+                             type: 'test'
+                          });
+                  i. GlideAjax---
+                       *It is client side API.
+                       * It is used to call the client callable script include.
+                       * It can be used in client script or UI policy.
+                       * How we define GlideAjax?
+                         var ga = new GlideAjax('Name of the Script Include');
+                      ga.addParm('sysparm_name','name of the method in Script Include');//identify which function we want to use from script include 
+                        ga.addParm('sysparm_variable_name',g_form.getValue('category'));//pass the value to that function
+                        ga.getXML('callbackfunction');//call this callbackfunction to get XML file
+                        
+                        function callbackfunction(response){//this function will get the value from the script include in the XML format
+                          var result = response.responseXML.documentElement.getAttribute('answer');//unwrapped the XML file, and get the actual answer from the 'answer' that exist in the XML file.
+                           alert(result);
+                        }
+                   ii.Use Cases-----1---- In the incident when the caller changes the email should also get change.
+                       Task --- write script in client script for incident table, 
+                                  var ga = new GlideAjax('getProblem');
+                                  ga.addParm('sysparm_name','getEmailID');
+                                  ga.addParm('sysparm_user_details',g_form.getValue('caller_id'));
+                                  ga.getXML('callbackfunction');
+                                  
+                                function callbackfunction(response){
+                               var result = respose.responseXML.documentElement.getAttribute('answer');
+                                g_form.setValue('u_email_id','result');
+                               }
+                                write the script in Script Include --
+                                getEmailID: function (){
+                                    var user = this.getParameter('sysparm_user_details');
+                                     var gr = new GlideRecord('sys_user');
+                                      gr.addQuery('sys_id',user);
+                                      gr.query();
+                                       if(gr.next()){
+                                         return gr.email;
+                                       }
+                                },
+                               then choose any role before save the script, like admin or itil, for which role the script include gonna be accessible.
+ 
+            xv. Return multiple values from the Script Include using JSON format instead of XML-----
+                    a. Javascript Object Notation(JSON) is used in data exchange between applications, such as APIs and web services.
+                    b. You can return multiple value from Script Include using JSON object.
+                    c. It stores data as key:value pair.
+                    d. {''Number'':"INC00123",''Priority'':"2 High"}
+                    e. Use cases-----1---- In the incident form when the caller changes in the description it should show all the incident that is raised               by the caller.
+                          Format example, how it will show in the description-- Incident Number - INC000123
+                                                                                                             Priority - 2 High
+                                                                                                             Short Description - This is a test incident
+                          write code on client script for incident table,-------
+                            var finalArray = []; 
+                           var ga = new GlideAjax('getIncDetails');
+                           ga.addParm('sysparm_name','getInc');
+                           ga.addParm('sysparm_user_id',g_form.getValue('caller_id'));
+                           ga.getXMLAnswer(IncDetails);//same as getXML but it works more proficiently
+ 
+                            function IncDetails(response){
+                              var obj = JSON.parse(response);
+                               for(var i=0;i<obj.length;i++){
+                                       finalArray.push('Incident Number '+obj[i].number +'\n'+' Priority '+ obj[i].priority +' Short Description '+ obj[i].short_desc+'\n\n');//if we don't use array then the value gonna print for one loop
+                    }
+                           g_form.setValue('description',finalArray);
+                                }  
+                              
+                           write the code on script include -----
+                             getInc:function(){
+                                 var incArray =[];
+                                 var gr = new GlideRecord('incident');
+                                 gr.addQuery('caller_id',this.getParameter('sysparm_user_id'));
+                                  gr.query();
+                        
+                               while(gr.next()){
+                                    var incDetails = {};
+                                     incDetails.number = gr.number.toString();
+                                     incDetails.priority = gr.priority.toString();
+                                     incDetais.short_desc = gr.short_description.toString();
+                                     incArrays.push(incDetails);
+                               }
+                       return JSON.stringify(incArray);
+          },
+ 
+               f. Use Cases----2----- Create a new field call 'Number of Group Member' in the incident form, and when you open the incident form and choose/change any assignment group, it should display the number group member available for the selected assignment group.
+                  Task---- Add a new field named 'Number of Group Memeber' using form layout on the incident form. Create client script      onChange of Assignment group, write code---
+                            var ga = new GlideAjax('getGroupMember');
+                            ga.addParm('sysparm_name','grpMember');
+                            ga.addParm('sysparm_assinment_group',g_form.getValue('assignment_group'));
+                            ga.addXMLAnswer(countMember);
+                         
+                              function countMember(response){
+                                if(response>0){
+                                  g_form.setValue('u_number_of_group_member',response);
+                                   }else{
+                                   alert(response);
+                                  }
+                               }
+                    write code on Script Include, with the name of 'getGroupMember'.-----
+                        grpMember: function(){
+                         var count=' ';
+                         var groupName = this.getParameter('sysparm_assignment_group');
+                          var gr = new GlideRecord('sys_user_grmember');
+                           gr.addQuery('group',groupName);
+                           gr.query();
+                            if(gr.next()){
+                             count= gr.getRowCount();
+                            }else{
+                              count= 'There are no group members available';
+                            }
+                         },
+                     
+                 g. Use Cases------3------ In the incident form whenever you will select any assignment group, it will randomly assign the incident to any member from the same assignment group and display it in the assignment to field.
+                      Task---  write the code in script Include ---
+                                   assignMembers: function(){
+                                      var grMember =[];
+                                      var groupId = this.getParameter('sysparm_group_name');
+                                      var gr = new GlideRecord('sys_user_grmember');
+                                      gr.addQuery('group',groupId);
+                                      gr.query();
+                                      while(gr.next()){
+                                       var member = {};//custom object
+                                       member.sys_id = gr.user.toString();
+                                       member.name = gr.user.getDisplayValue();//because name is string type
+                                       grMember.push(member);
+                                      }
+                                 return JSON.stringify(grMember);
+                       },
+                             write the code in client script on incident table and onChange of assignment group-----
+                             var ga = new GlideAjax('getGroupMember');
+                              ga.addParm('sysparm_name','assignMembers');
+                              ga.addParm('sysparm_group_name',g_form.getValue('assignment_group'));
+                              ga.getXMLAnswer(groupMember);
+                              fucntion groupMember(response){
+                              var member = JSON.parse(response);
+                                 if(member.length>0){
+                               var randomNum = Math.floor(Math.random()*member.length);//to find any random number in between the 0 to member array length and convert that number into whole number
+                                g_form.setValue('assigned_to',member[randomNum].sys_id);
+                                }else{
+                                 g_form.setValue('assigned_to',' ');
+                                 }
+                               }
+
+                h. Use Cases------4------ In the incident form while creating new incident if you select category a Network, in the assignment group you can only choose from two assignment group 'Network' and 'Network Cab Managers' also if category is Hardware, then you can only choose 'Hardware' assignment group.(Other assignment group won't be available for select)
+
+                      Task---- Here we don't use client script, because here we have to modify the assignment group table not a field on a form, so to modify the table we have to utilize the concept of disctionary override. the table of assignment group is the child class of task table, and it is also used in incident table with modifying some attribute on it. this is called dictionary override. One of the most important attribute on dictionary override is 'override reference qualifier'. Go to incident form--->right click-->go to table-->search in columns as assignment group-->  click assignmnet group---> in dictionary override section click incident---> on dictionary entry override click 'override reference qualifier'->write logic on the text box of reference qualifier.
+          javascript:new getGroupMember().showGroup(current.getValue('category'));
+         
+      write script include code----
+         showGroup: function(getCategory){//getCategory store the current value of the category field
+                    if(getCategory== 'network'){
+                      return 'sys_idIN'+gs.getProperty('getNetwork')+','+gs.getProperty('getNetworkCab');//create property on the 'sys_properties.list' table give the name of the property like getNetwork and getNetworkCab then paste the sys_id of the respective Network and NetworkCab assignment groups on the value field of the property form. directly access the sys_id is not good practice 
+       }else if(getCategory=='hardware'){
+                return 'sys_idIN' + gs.getProperty('getHardware'); //here also same create property named getHardware, on value field paste sys_id of the Hardware assignment group, 'sys_idIN' helps to get the sys_id of the property 
+           } 
+  },
+ 
+
+13. UI Actions Use Cases---------
+           i.Use cases----1----(server side) If the priority of the incident is critical and it is assigned to Network team, then a button will appear in the form mentioning 'Create Child Incident' and once clicking the button---
+                 *A child incident will be created and will be assigned to 'Network Cab Managers'.
+                 *Child incident will have same caller and short description but priority would be 3.
+            Task---- Create an UI action, name 'Create child incident', check 'Form Button', write action name 'child_incident'(any name as your wish,action name require when you access server side objects), choose table incident, check show insert, show update, write condition on UI action ----
+                      (current.priority==1)&&(current.assignment_group==gs.getProperty('getNetwork'));//here create the property in this name getNetwork, UI Action works on client and server side both
+                      write script on script part of UI Action-----
+                        var makeChild = new GlideRecord('incident');
+                        makeChild.initialize();
+                        makeChild.parent_incident = current.sys_id;
+                        makeChild.caller_id = current.caller_id;
+                        makeChild.setValue('impact',2);
+                        makeChild.setValue('urgency',2);
+                        makeChild.description = current.short_description;
+                        makeChild.assignment_group = gs.getProperty('getNetworkCab');
+                        action.setRedirectURL(current);//this setRedirectURL property helps to keep you on the same page after loading the page but will update the form
+                        makeChild.insert();
+ 
+             ii. Use Cases-----2------(client side)  If reassignment count of an incident becomes more than 3, then a button will appear mentioning 'Assign to IM'(IM=Incident Manager). Once clicking the button--
+             *If the priority of the incident is not High(2), then it would becomes as 2.
+             * If the category is not Inquiry, then it would become as Inquiry/Help.
+               Task--- write UI Action named 'Assigned to IM', check the 'Form Button' checkbox, check the client checkbox, write function name like 'assignToIM();' on Onclick box. write condition --- (current.reassignment_count>=3)write script on UI Action----
+                       function assignToIM(){//function name should be similar as you mention on Onclick 
+                      if(g_form.getValue('priority')!=2){//here you can only use client side scription as you click client
+                      g_form.setValue('impact',1);
+                      g_form.setValue('urgent',2);
+                    }
+                      if(g_form.getValue('category')!='inquiry'){
+                       g_form.setValue('category','inquiry');
+                    }
+                      }
+
+            iii. Use Cases------3------(Server+ client side) If reassignment count of an ncident becomes more than 3, then a button will appear mentioning 'Assign to IM'. Once clicking the button-- It will assign the incident to the IM Group(Create a new Group)...
+                create UI Action on the previous Use case --2 ,give some name on the 'Action name' as you will work on server side, like--'IM_team'.  Create new assignment group named 'IM Team'.Inside the client function assignToIM() write (after the if statements)----
+                                gsftSubmit(null,g_form.getFormElement(),'IM_team');//gsftSubmit function helps to write server side script over client side
+                       start writing after the client function-----
+                                    if(typeof window =='undefined'){//it checks that client side script works on browser or not
+                                      assign_IM();//this is server side script function name
+                                    }
+                                   function assign_IM(){
+                                    current.assignment_group = gs.getProperty('getIM');//create property for 'IM Team' assignment group named 'getIM' with the sys_id of that group in the value field of the property
+                                    current.update();//current.update() only not applicable for business rule
+                                    action.setRedirectURL(current);
+                                  }
